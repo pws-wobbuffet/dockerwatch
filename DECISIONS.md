@@ -55,6 +55,10 @@
 **Decision:** Container stats calls are dispatched concurrently using `asyncio.run_in_executor` (ThreadPoolExecutor) to avoid blocking the event loop while Docker SDK makes blocking calls.
 **Rationale:** The Docker Python SDK is synchronous. Without concurrency, fetching stats for N running containers takes N * ~1 s sequentially. Concurrent fetching caps latency at ~1 s regardless of container count.
 
+### D-005: Graceful handling of cgroup memory accounting disabled
+**Decision:** On this Raspberry Pi the `cgroup_memory` kernel option is not enabled, so `memory_stats.usage` and `memory_stats.limit` are always `None`/`0` for all containers (confirmed via `docker stats`). `_parse_stats` falls back to `stats.anon + stats.file`; if that is also 0 the UI shows "N/A (cgroup disabled)" instead of "0 B / 0 B".
+**Rationale:** Showing "0 / 0 B" would mislead operators into thinking containers use no memory. Surfacing the root cause is more useful.
+
 ### D-004: Log viewer uses tail-100 by default, user-selectable up to 500
 **Decision:** Logs endpoint accepts `?tail=N` capped at 500 lines.
 **Rationale:** Unbounded log fetch on a resource-constrained Pi could OOM the process. 500 lines covers any reasonable inspection need.

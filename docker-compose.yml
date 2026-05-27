@@ -1,0 +1,23 @@
+services:
+  dockerwatch:
+    build:
+      context: .
+      args:
+        # Must match the host docker group GID so the container user can
+        # access /var/run/docker.sock without running as root.
+        DOCKER_GID: "992"
+    image: dockerwatch:latest
+    container_name: dockerwatch
+    restart: unless-stopped
+    ports:
+      - "${DOCKERWATCH_PORT:-8080}:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - LOG_TAIL_MAX=${LOG_TAIL_MAX:-500}
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
