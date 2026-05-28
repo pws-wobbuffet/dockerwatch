@@ -19,7 +19,7 @@ services:
       - proxy
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dockerwatch.rule=Host(`dockerwatch.pws-bot`)"
+      - "traefik.http.routers.dockerwatch.rule=Host(`dockerwatch.bot.pws.internal`)"
       - "traefik.http.services.dockerwatch.loadbalancer.server.port=8080"
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
